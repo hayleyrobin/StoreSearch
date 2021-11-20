@@ -15,13 +15,43 @@
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="7Kw-iB-Zsx">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                <connections>
+                                    <outlet property="dataSource" destination="BYZ-38-t0r" id="FRX-1Z-YVZ"/>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="DIr-be-BPh"/>
+                                </connections>
+                            </tableView>
+                            <searchBar contentMode="redraw" placeholder="App name, artist, song, album, e-book" translatesAutoresizingMaskIntoConstraints="NO" id="thy-on-Mk6">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="51"/>
+                                <textInputTraits key="textInputTraits"/>
+                                <connections>
+                                    <outlet property="delegate" destination="BYZ-38-t0r" id="sbF-XP-5KW"/>
+                                </connections>
+                            </searchBar>
+                        </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="thy-on-Mk6" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="49o-Nz-V95"/>
+                            <constraint firstItem="7Kw-iB-Zsx" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="LCD-Fh-amS"/>
+                            <constraint firstItem="7Kw-iB-Zsx" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Myt-1g-iwW"/>
+                            <constraint firstItem="thy-on-Mk6" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="OZN-WJ-mx2"/>
+                            <constraint firstItem="7Kw-iB-Zsx" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="RLF-5n-S2w"/>
+                            <constraint firstItem="7Kw-iB-Zsx" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="b8f-3e-Ry3"/>
+                            <constraint firstItem="thy-on-Mk6" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="xbj-Bq-JTp"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="searchBar" destination="thy-on-Mk6" id="fex-Vr-gVu"/>
+                        <outlet property="tableView" destination="7Kw-iB-Zsx" id="Al6-4a-Qt4"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="84" y="66"/>
+            <point key="canvasLocation" x="84" y="65.217391304347828"/>
         </scene>
     </scenes>
     <resources>
