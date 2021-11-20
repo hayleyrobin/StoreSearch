@@ -24,6 +24,8 @@ class SearchViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        searchBar.becomeFirstResponder()
+
        tableView.contentInset = UIEdgeInsets(top: 50, left: 0, bottom: 0, right: 0)
         
         //  load the nib &ask the table view to register this nib for the reuse identifier “SearchResultCell”.
