@@ -36,28 +36,81 @@ class SearchViewController: UIViewController {
           cellNib,
           forCellReuseIdentifier: TableView.CellIdentifiers.nothingFoundCell)
 
+    }
+    // MARK: - Helper Methods
+    
+    // builds a URL string by placing the search text behind the “term=” parameter, and then turns this string into a URL object.
+    func iTunesURL(searchText: String) -> URL {
+      let encodedText = searchText.addingPercentEncoding(
+          withAllowedCharacters: CharacterSet.urlQueryAllowed)!
+      let urlString = String(
+        format: "https://itunes.apple.com/search?term=%@",
+        encodedText)
+      let url = URL(string: urlString)
+      return url!
+    }
+    //  call to String(contentsOf:encoding:) returns a new string object with the data it receives from the server pointed to by the URL.
+    func performStoreRequest(with url: URL) -> Data? {
+        do {
+        return try Data(contentsOf: url)
+        }
+        catch {
+        print("Download Error: \(error.localizedDescription)")
+        showNetworkError() // show an alert box
 
-
+       return nil
+      }
+    }
+    //  convert the response data from the server to a temporary ResultArray object
+    func parse(data: Data) -> [SearchResult] {
+      do {
+        let decoder = JSONDecoder()
+        let result = try decoder.decode(
+          ResultArray.self, from: data)
+        return result.results
+      } catch {
+        print("JSON Error: \(error)")
+        return []
+      }
+    }
+    
+    // presents an alert controller with an error message.
+    func showNetworkError() {
+      let alert = UIAlertController(
+        title: "Whoops...",
+        message: "There was an error accessing the iTunes Store." +
+        " Please try again.",
+        preferredStyle: .alert)
+      
+      let action = UIAlertAction(
+        title: "OK", style: .default, handler: nil)
+      alert.addAction(action)
+      present(alert, animated: true, completion: nil)
     }
 
 
 }
 // MARK: - Search Bar Delegate
 extension SearchViewController: UISearchBarDelegate {
+    // call the new iTunesURL(searchText:)
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+      if !searchBar.text!.isEmpty {
         searchBar.resignFirstResponder()
-        searchResults = [] // instantiate a new String array and replace the contents
-        if searchBar.text! != "justin bieber" {
-            for i in 0...2 {
-            let searchResult = SearchResult()
-            searchResult.name = String(format: "Fake Result %d for", i)
-            searchResult.artistName = searchBar.text!
-            searchResults.append(searchResult)
-            }
-        }
+
         hasSearched = true
-      tableView.reloadData()
+        searchResults = []
+
+        let url = iTunesURL(searchText: searchBar.text!)
+        print("URL: '\(url)'")
+        if let data = performStoreRequest(with: url) {
+            searchResults = parse(data: data)
+            searchResults.sort { $0 < $1 }
+
+        }
+        tableView.reloadData()
+      }
     }
+
     // status bar area was unified with the search bar
     func position(for bar: UIBarPositioning) -> UIBarPosition {
       return .topAttached
@@ -91,7 +144,15 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
 
         let searchResult = searchResults[indexPath.row]
         cell.nameLabel.text = searchResult.name
-        cell.artistNameLabel.text = searchResult.artistName
+        if searchResult.artist.isEmpty {
+          cell.artistNameLabel.text = "Unknown"
+        } else {
+          cell.artistNameLabel.text = String(
+            format: "%@ (%@)",
+            searchResult.artist,
+            searchResult.type)
+        }
+
         return cell
       }
     }
