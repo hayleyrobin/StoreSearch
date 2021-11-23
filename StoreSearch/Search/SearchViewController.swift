@@ -23,6 +23,8 @@ class SearchViewController: UIViewController {
     var searchResults = [SearchResult]() // fake array for data
     var hasSearched = false
     var isLoading = false
+    var dataTask: URLSessionDataTask? // optional because you won’t have a data task until the user performs a search.
+
 
 
 
@@ -111,6 +113,7 @@ extension SearchViewController: UISearchBarDelegate {
       if !searchBar.text!.isEmpty {
         searchBar.resignFirstResponder()
 
+        dataTask?.cancel() //If there is an active data task, this cancels it,
         isLoading = true
         tableView.reloadData()
 
@@ -123,11 +126,14 @@ extension SearchViewController: UISearchBarDelegate {
         let session = URLSession.shared
 
         //  fetches the contents of a given URL. The code from the completion handler will be invoked when the data task has received a response from the server.
-        let dataTask = session.dataTask(with: url) {data, response, error in
-            if let error = error {
-              print("Failure! \(error.localizedDescription)")
-            } else if let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200 {
+        dataTask = session.dataTask(with: url, completionHandler: {data, response, error in
+            if let error = error as NSError?, error.code == -999
+            {
+                return  // Search was cancelled
+            }
+            else if let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200
+            {
                 if let data = data {
                   self.searchResults = self.parse(data: data)
                   self.searchResults.sort(by: <)
@@ -147,9 +153,9 @@ extension SearchViewController: UISearchBarDelegate {
               self.tableView.reloadData() // refreshed to get rid of the Loading…
               self.showNetworkError() // let the user know about the problem
             }
-        }
+        })
         // once you have created the data task, you need to call resume() to start it. This sends the request to the server on a background thread. So, the app is immediately free to continue — URLSession is as asynchronous as they come.
-        dataTask.resume()
+        dataTask?.resume()
       }
     }
 
