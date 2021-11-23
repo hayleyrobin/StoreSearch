@@ -116,25 +116,40 @@ extension SearchViewController: UISearchBarDelegate {
 
         hasSearched = true
         searchResults = []
+        // Create the URL object using the search text
+        let url = iTunesURL(searchText: searchBar.text!)
 
-        // gets reference to global queue & URL for search
-        let queue = DispatchQueue.global()
-        let url = self.iTunesURL(searchText: searchBar.text!)
-            //dispatch a closure on queue
-        queue.async {
-        // put on the queue and be executed asynchronously in the background. After scheduling this closure, the main thread is immediately free to continue. It is no longer blocked.
-          if let data = self.performStoreRequest(with: url) {
-            self.searchResults = self.parse(data: data)
-            self.searchResults.sort(by: <)
-                DispatchQueue.main.async {
-                  self.isLoading = false
-                  self.tableView.reloadData()
+        // uses the default configuration with respect to caching, cookies, and other web stuff.
+        let session = URLSession.shared
+
+        //  fetches the contents of a given URL. The code from the completion handler will be invoked when the data task has received a response from the server.
+        let dataTask = session.dataTask(with: url) {data, response, error in
+            if let error = error {
+              print("Failure! \(error.localizedDescription)")
+            } else if let httpResponse = response as? HTTPURLResponse,
+              httpResponse.statusCode == 200 {
+                if let data = data {
+                  self.searchResults = self.parse(data: data)
+                  self.searchResults.sort(by: <)
+                  DispatchQueue.main.async {
+                    self.isLoading = false
+                    self.tableView.reloadData()
+                  }
+                  return // exits the closure after the search results get displayed in the table view
                 }
-
-            return
+            } else {
+                print("Failure! \(response!)")
+            }
+            // if something went wrong
+            DispatchQueue.main.async {
+              self.hasSearched = false
+              self.isLoading = false
+              self.tableView.reloadData() // refreshed to get rid of the Loading…
+              self.showNetworkError() // let the user know about the problem
             }
         }
-
+        // once you have created the data task, you need to call resume() to start it. This sends the request to the server on a background thread. So, the app is immediately free to continue — URLSession is as asynchronous as they come.
+        dataTask.resume()
       }
     }
 
